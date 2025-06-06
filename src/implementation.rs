@@ -58,15 +58,15 @@ fn max_num_days(date: &crate::Date) -> u32 {
 }
 
 /// Check if a object of Struct Date is correct and valid
-pub fn is_date_correct(date: &crate::Date) -> bool {
+pub fn is_date_valid(date: &crate::Date) -> Result<(), String> {
   // check year
   if is_year_valid(date.year) == false {
-    return false;
+    return Err(String::from("Invalid year. Probably 0?"));
   }
   // check days
   let max_num_days: u32 = max_num_days(date);
   if date.day == 0 || date.day > max_num_days {
-    return false;
+    return Err(String::from("Invalid day, out of month range"));
   }
-  return true;
+  Ok(())
 }
