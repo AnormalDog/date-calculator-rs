@@ -4,13 +4,16 @@
 //!
 //! Internal implementation of the library
 
+use crate::implementation::standardize_year;
+
 mod implementation;
 
 pub struct Date {
-  day: u32,
-  month: Months,
   year: i32,
+  month: Months,
+  day: u32,
 }
+
 #[derive(Clone, Copy)]
 pub enum Months {
   Jan,
@@ -28,22 +31,14 @@ pub enum Months {
 }
 
 impl Date {
-  pub fn new(day: u32, month: Months, year: i32) -> Result<Self, String> {
-    let x = Date {
-      day: day,
-      month: month,
-      year: year,
-    };
-    match implementation::is_date_valid(&x) {
-      Ok(()) => Ok(x),
-      Err(string) => Err(string)
+  /// Create a new instance of Date
+  pub fn new(year: i32, month: Months, day: u32) -> Result<Self, String> {
+    match implementation::is_new_date_valid(year, month, day) {
+      Ok(_) => Ok(Date{year : standardize_year(year), month : month, day : day}),
+      Err(error) => Err(error)
     }
   }
-
-  pub fn is_leap(&self) -> bool {
-    return implementation::is_year_leap(self.year);
-  }
-}
+} // impl Date
 
 #[cfg(test)]
 mod tests {
@@ -57,9 +52,11 @@ mod tests {
 
   #[test]
   fn test_new_date() {
-    match Date::new(28, Months::Feb, 2001) {
+    match Date::new(-1, Months::Feb, 29) {
       Ok(_) => assert!(true),
       Err(_) => assert!(false)
     }
   }
+
+
 }
