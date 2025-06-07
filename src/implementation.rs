@@ -4,46 +4,8 @@
 //!
 //! Internal implementation of the library
 
-use crate::Months;
-
-impl Months {
-  /// Returns a i8 representing the order of the months
-  fn get_month_index(self) -> i8 {
-    match self {
-      Months::Jan => 0,
-      Months::Feb => 1,
-      Months::Mar => 2,
-      Months::Apr => 3,
-      Months::May => 4,
-      Months::Jun => 5,
-      Months::Jul => 6,
-      Months::Aug => 7,
-      Months::Sep => 8,
-      Months::Oct => 9,
-      Months::Nov => 10,
-      Months::Dec => 11
-    }
-  }
-
-  /// Returns the number of days a months has.
-  /// If the month is february, returns 0, which means that need to consideer the year
-  fn get_number_of_days(self) -> u32 {
-    match self {
-      Months::Jan
-      | Months::Mar
-      | Months::May
-      | Months::Jul
-      | Months::Aug
-      | Months::Oct
-      | Months::Dec => 31,
-      Months::Feb => 0,
-      _ => 30,
-    }
-  }
-} // impl Months
-
 /// Returns true or false if the year is leap or not
-pub fn is_year_leap(year: i32) -> bool {
+fn is_year_leap(year: i64) -> bool {
   if year % 4 != 0 {
     return false;
   }
@@ -52,52 +14,60 @@ pub fn is_year_leap(year: i32) -> bool {
   }
   if year % 400 == 0 { true } else { false }
 }
+/// Returns the number of leap gap between two years (both included)
+fn leap_years_between(a: i64, b: i64) -> i64 {
+  let mut n_of_leap_years: i64 = 0;
+  for year in a..=b {
+    if is_year_leap(year) == true {
+      n_of_leap_years += 1;
+    }
+  }
+  return n_of_leap_years;
+}
 
-/// Returs the max number of days a months can hold
-fn max_num_days_in_month(year : i32, month : Months) -> u32 {
+pub fn get_year_index(year: i64, month: u8, day: u8) -> i64 {
+  let mut number_of_days : i64 = 0;
+  for n in 1..month {
+    number_of_days += get_day_per_month(year, n);
+  }
+  number_of_days += i64::from(day);
+  return number_of_days;
+}
+
+fn get_day_per_month(year: i64, month: u8) -> i64 {
+  assert!(month > 0 && month < 13);
   match month {
-    Months::Feb => {
+    1 | 3 | 5 | 7 | 8 | 10 | 12 => return 31,
+    2 => {
       if is_year_leap(year) == true {
-        29
+        return 29;
       } else {
-        28
+        return 28;
       }
     }
-    _ => month.get_number_of_days(),
+    _ => return 30,
   }
 }
 
-/// Check if a object of Struct Date is correct and valid
-pub fn is_new_date_valid(year: i32, month: Months, day: u32) -> Result<(), String> {
-  // check year
-  if year == 0 {
-    return Err(String::from("Invalid year, probably 0?"));
-  }
-  // check days
-  let max_num_days: u32 = max_num_days_in_month(standardize_year(year), month);
-  if day == 0 || day > max_num_days {
-    return Err(String::from("Invalid day, out of month range"));
-  }
-  Ok(())
+fn check_if_raw_date_is_ok(year : i64, month : u8, day : u8) -> bool {
+  
+  true
 }
 
-/// Standardize the year, adding +1 to BC years
-pub fn standardize_year(year : i32) -> i32 {
-  assert_ne!(year, 0);
-  if year < 0 {
-    return year + 1;
-  }
-  else {
-    return year;
-  }
-}
 
-/// Normalize into BC-AC year format
-pub fn unstandardize_year(year : i32) -> i32 {
-  if year <= 0 {
-    return year - 1;
+
+#[cfg(test)]
+mod impl_test {
+  use crate::implementation::{self, get_year_index};
+
+  #[test]
+  fn leap_years_between() {
+    let n = implementation::leap_years_between(-44, 0);
+    assert_eq!(n, 12);
   }
-  else {
-    return year;
+
+  #[test]
+  fn get_year_index_test() {
+    assert_eq!(get_year_index(2000, 01, 16), 16);
   }
 }
