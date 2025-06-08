@@ -6,10 +6,13 @@ Library that implements functions for date operations
 WIP
 
 ## Planned functions implementations
-- [ ] Count days.
-- [ ] Add days.
-- [ ] Substract days.
-- [x] is date year leap.
+- [x] new.
+- [ ] Count days between two dates.
+- [ ] Add/Substract days.
+- [ ] Add/Substract weeks.
+- [ ] Add/Substract months.
+- [ ] Add/Substract years.
+- [x] is date's year leap.
 - [ ] more
 
 ## LICENSE
