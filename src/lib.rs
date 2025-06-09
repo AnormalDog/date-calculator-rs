@@ -7,7 +7,6 @@
 use crate::implementation::{
   check_if_raw_date_is_ok, get_date_standard, get_year_index, is_year_leap, normalize_year,
 };
-
 use std::fmt;
 
 mod implementation;
@@ -19,14 +18,14 @@ pub struct Date {
 
 #[derive(Debug, Clone, Copy)]
 pub enum DateError {
-  ErrorWrongRawData
+  ErrorWrongRawData,
 }
 
 impl fmt::Display for DateError {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-      match *self {
-          DateError::ErrorWrongRawData => f.write_str("The date introduced is wrong"),
-      }
+    match *self {
+      DateError::ErrorWrongRawData => f.write_str("The date introduced is wrong"),
+    }
   }
 }
 
@@ -38,18 +37,19 @@ impl Date {
       year: normalize_year(year),
       remain: get_year_index(year, month, day),
     };
-    return Ok(x);
+    Ok(x)
   }
 
   /// Check if the date's year is leap
   pub fn is_leap(&self) -> bool {
-    return is_year_leap(self.year);
+    is_year_leap(self.year)
   }
+}
 
-  /// add n days to a Date
-  pub fn get_simple(&self) -> String {
+impl fmt::Display for Date {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     let x = get_date_standard(self.year, self.remain);
-    return format!("{} - {:0>2} - {:0>2}", self.year, x.0, x.1);
+    write!(f, "{} - {:0>2} - {:0>2}", self.year, x.0, x.1)
   }
 }
 
@@ -68,10 +68,10 @@ mod lib_test {
   }
 
   #[test]
-  fn get_simple_test() {
+  fn to_string_test() {
     assert_eq!(
       String::from("2024 - 04 - 04"),
-      Date::get_simple(&Date::new(2024, 04, 04).unwrap())
+      Date::to_string(&Date::new(2024, 04, 04).unwrap())
     );
   }
 }

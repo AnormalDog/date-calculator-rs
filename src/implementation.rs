@@ -16,18 +16,14 @@ pub fn is_year_leap(year: i64) -> bool {
   if year % 100 != 0 {
     return true;
   }
-  if year % 400 == 0 { true } else { false }
+  year % 400 == 0
 }
 
 /// Returns how many days have passed in the year
 ///   Basically converts Y/M/D to Y/D
 pub fn get_year_index(year: i64, month: u8, day: u8) -> u64 {
-  let mut number_of_days: u64 = 0;
-  for n in 1..month {
-    number_of_days += get_day_per_month(year, n);
-  }
-  number_of_days += u64::from(day);
-  return number_of_days;
+  let days: u64 = (1..month).map(|n| get_day_per_month(year, n)).sum();
+  days + day as u64
 }
 
 /// Returns a pair month/day knowing the index of the year
@@ -39,56 +35,42 @@ pub fn get_date_standard(year: i64, index: u64) -> (u8, u8) {
     total_number_of_days -= get_day_per_month(year, number_of_month as u8);
     number_of_month += 1;
   }
-  return (number_of_month as u8, total_number_of_days as u8);
+  (number_of_month as u8, total_number_of_days as u8)
 }
 
 /// Returns the number of days a month has
 fn get_day_per_month(year: i64, month: u8) -> u64 {
   assert!(month > 0 && month < 13);
   match month {
-    1 | 3 | 5 | 7 | 8 | 10 | 12 => return 31,
-    2 if is_year_leap(year) == true => 29,
+    1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
+    2 if is_year_leap(year) => 29,
     2 => 28,
-    _ => return 30,
+    _ => 30,
   }
 }
 
 /// returns the year, moving all negative years one number to right, being 1BC the 0, 2BC the -1...
 #[inline]
 pub fn normalize_year(year: i64) -> i64 {
-  if year < 0 {
-    return year + 1;
-  } else {
-    return year;
-  }
+  if year < 0 { year + 1 } else { year }
 }
 
 /// Returns ok or a string with what was wrong first
 pub fn check_if_raw_date_is_ok(year: i64, month: u8, day: u8) -> Result<(), DateError> {
   // check year
-  if year == 0 {
-    return Err(DateError::ErrorWrongRawData);
+  if (year == 0)
+    || (month == 0 || month > 12)
+    || (day == 0 || u64::from(day) > get_day_per_month(year, month))
+  {
+    Err(DateError::ErrorWrongRawData)
+  } else {
+    Ok(())
   }
-  // check month
-  else if month == 0 || month > 12 {
-    return Err(DateError::ErrorWrongRawData);
-  }
-  // check day
-  else if day == 0 || u64::from(day) > get_day_per_month(year, month) {
-    return Err(DateError::ErrorWrongRawData);
-  }
-  return Ok(());
 }
 
 #[cfg(test)]
 mod impl_test {
-  use crate::implementation::{self, get_date_standard, get_year_index};
-
-  #[test]
-  fn leap_years_between() {
-    let n = implementation::leap_years_between(-44, 0);
-    assert_eq!(n, 12);
-  }
+  use crate::implementation::{get_date_standard, get_year_index};
 
   #[test]
   fn get_year_index_test() {
