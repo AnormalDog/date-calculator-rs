@@ -5,6 +5,7 @@
 //!
 //! Library
 
+pub use crate::implementation::DateError;
 use crate::implementation::{
   check_if_raw_date_is_ok, get_date_standard, get_year_index, is_year_leap, normalize_year,
 };
@@ -18,7 +19,7 @@ pub struct Date {
 
 impl Date {
   /// Creates a new instance of Date
-  pub fn new(year: i64, month: u8, day: u8) -> Result<Self, String> {
+  pub fn new(year: i64, month: u8, day: u8) -> Result<Self, DateError> {
     check_if_raw_date_is_ok(year, month, day)?;
     let x = Date {
       year: normalize_year(year),

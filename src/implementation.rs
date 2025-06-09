@@ -78,18 +78,37 @@ pub fn normalize_year(year: i64) -> i64 {
 }
 
 /// Returns ok or a string with what was wrong first
-pub fn check_if_raw_date_is_ok(year: i64, month: u8, day: u8) -> Result<(), String> {
+pub fn check_if_raw_date_is_ok(year: i64, month: u8, day: u8) -> Result<(), DateError> {
   if year == 0 {
-    return Err(String::from("the year is invalid"));
+    return Err(DateError::InvalidYear);
   };
   if month == 0 || month > 12 {
-    return Err(String::from("the month is invalid"));
+    return Err(DateError::InvalidMonth);
   };
   if day == 0 || u64::from(day) > get_day_per_month(year, month) {
-    return Err(String::from("the day is invalid"));
+    return Err(DateError::InvalidDay);
   };
   Ok(())
 }
+
+#[derive(Debug, Copy, Clone)]
+pub enum DateError {
+  InvalidYear,
+  InvalidMonth,
+  InvalidDay,
+}
+
+impl fmt::Display for DateError {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match *self {
+      DateError::InvalidYear => f.write_str("the year is invalid"),
+      DateError::InvalidMonth => f.write_str("the month is invalid"),
+      DateError::InvalidDay => f.write_str("the day is invalid"),
+    }
+  }
+}
+
+impl Error for DateError {}
 
 #[cfg(test)]
 mod impl_test {
