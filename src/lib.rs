@@ -1,3 +1,4 @@
+#![allow(clippy::zero_prefixed_literal)]
 //! Author: AnormalDog (https://github.com/AnormalDog)
 //! Copyright (c) 2025 AnormalDog
 //! Licensed under the MIT License. See LICENSE file in the project root for full license information.
@@ -23,18 +24,18 @@ impl Date {
       year: normalize_year(year),
       remain: get_year_index(year, month, day),
     };
-    return Ok(x);
+    Ok(x)
   }
 
   /// Check if the date's year is leap
   pub fn is_leap(&self) -> bool {
-    return is_year_leap(self.year);
+    is_year_leap(self.year)
   }
 
   /// add n days to a Date
   pub fn get_simple(&self) -> String {
     let x = get_date_standard(self.year, self.remain);
-    return format!("{} - {:0>2} - {:0>2}", self.year, x.0, x.1);
+    format!("{} - {:0>2} - {:0>2}", self.year, x.0, x.1)
   }
 }
 
@@ -49,7 +50,7 @@ mod lib_test {
 
   #[test]
   fn leap_test() {
-    assert_eq!(Date::is_leap(&Date::new(2000, 1, 1).unwrap()), true);
+    assert!(Date::is_leap(&Date::new(2000, 1, 1).unwrap()));
   }
 
   #[test]

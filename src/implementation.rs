@@ -4,6 +4,10 @@
 //!
 //! Internal implementation of the library
 
+use std::error::Error;
+use std::fmt;
+use std::fmt::Write;
+
 const MAX_DAYS_YEAR: u64 = 366;
 
 /// Returns true or false if the year is leap or not
@@ -14,18 +18,18 @@ pub fn is_year_leap(year: i64) -> bool {
   if year % 100 != 0 {
     return true;
   }
-  if year % 400 == 0 { true } else { false }
+  year % 400 == 0
 }
 
 /// Returns the number of leap gap between two years (both included)
 fn leap_years_between(a: i64, b: i64) -> i64 {
   let mut n_of_leap_years: i64 = 0;
   for year in a..=b {
-    if is_year_leap(year) == true {
+    if is_year_leap(year) {
       n_of_leap_years += 1;
     }
   }
-  return n_of_leap_years;
+  n_of_leap_years
 }
 
 /// Returns how many days have passed in the year
@@ -36,7 +40,7 @@ pub fn get_year_index(year: i64, month: u8, day: u8) -> u64 {
     number_of_days += get_day_per_month(year, n);
   }
   number_of_days += u64::from(day);
-  return number_of_days;
+  number_of_days
 }
 
 /// Returns a pair month/day knowing the index of the year
@@ -48,47 +52,43 @@ pub fn get_date_standard(year: i64, index: u64) -> (u8, u8) {
     total_number_of_days -= get_day_per_month(year, number_of_month as u8);
     number_of_month += 1;
   }
-  return (number_of_month as u8, total_number_of_days as u8);
+  (number_of_month as u8, total_number_of_days as u8)
 }
 
 /// Returns the number of days a month has
 fn get_day_per_month(year: i64, month: u8) -> u64 {
   assert!(month > 0 && month < 13);
   match month {
-    1 | 3 | 5 | 7 | 8 | 10 | 12 => return 31,
+    1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
     2 => {
-      if is_year_leap(year) == true {
-        return 29;
+      if is_year_leap(year) {
+        29
       } else {
-        return 28;
+        28
       }
     }
-    _ => return 30,
+    _ => 30,
   }
 }
 
 /// returns the year, moving all negative years one number to right, being 1BC the 0, 2BC the -1...
 #[inline]
 pub fn normalize_year(year: i64) -> i64 {
-  if year < 0 {
-    return year + 1;
-  } else {
-    return year;
-  }
+  if year < 0 { year + 1 } else { year }
 }
 
 /// Returns ok or a string with what was wrong first
 pub fn check_if_raw_date_is_ok(year: i64, month: u8, day: u8) -> Result<(), String> {
   if year == 0 {
-    return Err(String::from("The year is incorrect"));
+    return Err(String::from("the year is invalid"));
   };
   if month == 0 || month > 12 {
-    return Err(String::from("The month is incorrect"));
+    return Err(String::from("the month is invalid"));
   };
   if day == 0 || u64::from(day) > get_day_per_month(year, month) {
-    return Err(String::from("The day is incorrect"));
+    return Err(String::from("the day is invalid"));
   };
-  return Ok(());
+  Ok(())
 }
 
 #[cfg(test)]
