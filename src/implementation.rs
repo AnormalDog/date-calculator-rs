@@ -19,17 +19,6 @@ pub fn is_year_leap(year: i64) -> bool {
   if year % 400 == 0 { true } else { false }
 }
 
-/// Returns the number of leap gap between two years (both included)
-fn leap_years_between(a: i64, b: i64) -> i64 {
-  let mut n_of_leap_years: i64 = 0;
-  for year in a..=b {
-    if is_year_leap(year) == true {
-      n_of_leap_years += 1;
-    }
-  }
-  return n_of_leap_years;
-}
-
 /// Returns how many days have passed in the year
 ///   Basically converts Y/M/D to Y/D
 pub fn get_year_index(year: i64, month: u8, day: u8) -> u64 {
