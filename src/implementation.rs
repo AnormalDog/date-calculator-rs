@@ -4,6 +4,8 @@
 //!
 //! Internal implementation of the library
 
+use crate::DateError;
+
 const MAX_DAYS_YEAR: u64 = 366;
 
 /// Returns true or false if the year is leap or not
@@ -56,13 +58,8 @@ fn get_day_per_month(year: i64, month: u8) -> u64 {
   assert!(month > 0 && month < 13);
   match month {
     1 | 3 | 5 | 7 | 8 | 10 | 12 => return 31,
-    2 => {
-      if is_year_leap(year) == true {
-        return 29;
-      } else {
-        return 28;
-      }
-    }
+    2 if is_year_leap(year) == true => 29,
+    2 => 28,
     _ => return 30,
   }
 }
@@ -78,16 +75,19 @@ pub fn normalize_year(year: i64) -> i64 {
 }
 
 /// Returns ok or a string with what was wrong first
-pub fn check_if_raw_date_is_ok(year: i64, month: u8, day: u8) -> Result<(), String> {
+pub fn check_if_raw_date_is_ok(year: i64, month: u8, day: u8) -> Result<(), DateError> {
+  // check year
   if year == 0 {
-    return Err(String::from("The year is incorrect"));
-  };
-  if month == 0 || month > 12 {
-    return Err(String::from("The month is incorrect"));
-  };
-  if day == 0 || u64::from(day) > get_day_per_month(year, month) {
-    return Err(String::from("The day is incorrect"));
-  };
+    return Err(DateError::ErrorWrongRawData);
+  }
+  // check month
+  else if month == 0 || month > 12 {
+    return Err(DateError::ErrorWrongRawData);
+  }
+  // check day
+  else if day == 0 || u64::from(day) > get_day_per_month(year, month) {
+    return Err(DateError::ErrorWrongRawData);
+  }
   return Ok(());
 }
 

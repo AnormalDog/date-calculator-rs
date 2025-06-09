@@ -8,6 +8,8 @@ use crate::implementation::{
   check_if_raw_date_is_ok, get_date_standard, get_year_index, is_year_leap, normalize_year,
 };
 
+use std::fmt;
+
 mod implementation;
 
 pub struct Date {
@@ -15,9 +17,22 @@ pub struct Date {
   remain: u64,
 }
 
+#[derive(Debug, Clone, Copy)]
+pub enum DateError {
+  ErrorWrongRawData
+}
+
+impl fmt::Display for DateError {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+      match *self {
+          DateError::ErrorWrongRawData => f.write_str("The date introduced is wrong"),
+      }
+  }
+}
+
 impl Date {
   /// Creates a new instance of Date
-  pub fn new(year: i64, month: u8, day: u8) -> Result<Self, String> {
+  pub fn new(year: i64, month: u8, day: u8) -> Result<Self, DateError> {
     check_if_raw_date_is_ok(year, month, day)?;
     let x = Date {
       year: normalize_year(year),
