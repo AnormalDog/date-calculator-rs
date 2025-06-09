@@ -4,29 +4,17 @@
 //!
 //! Library
 
+mod implementation;
+
 use crate::implementation::{
   check_if_raw_date_is_ok, get_date_standard, get_year_index, is_year_leap, normalize_year,
 };
-use std::fmt;
 
-mod implementation;
+use std::fmt;
 
 pub struct Date {
   year: i64,
   remain: u64,
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum DateError {
-  ErrorWrongRawData,
-}
-
-impl fmt::Display for DateError {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    match *self {
-      DateError::ErrorWrongRawData => f.write_str("The date introduced is wrong"),
-    }
-  }
 }
 
 impl Date {
@@ -51,7 +39,20 @@ impl fmt::Display for Date {
     let x = get_date_standard(self.year, self.remain);
     write!(f, "{} - {:0>2} - {:0>2}", self.year, x.0, x.1)
   }
+} // impl fmt::Display for Date
+
+#[derive(Debug, Clone, Copy)]
+pub enum DateError {
+  ErrorWrongRawData,
 }
+
+impl fmt::Display for DateError {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match *self {
+      DateError::ErrorWrongRawData => f.write_str("The date introduced is wrong"),
+    }
+  }
+} // impl fmt::Display for DateError
 
 #[cfg(test)]
 mod lib_test {
