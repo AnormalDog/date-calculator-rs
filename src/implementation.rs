@@ -23,24 +23,17 @@ pub fn is_year_leap(year: i64) -> bool {
 
 /// Returns the number of leap gap between two years (both included)
 fn leap_years_between(a: i64, b: i64) -> i64 {
-  let mut n_of_leap_years: i64 = 0;
-  for year in a..=b {
-    if is_year_leap(year) {
-      n_of_leap_years += 1;
-    }
-  }
-  n_of_leap_years
+  debug_assert!(a >= b);
+  (a..=b).filter(|year| is_year_leap(*year)).count() as i64
 }
 
 /// Returns how many days have passed in the year
 ///   Basically converts Y/M/D to Y/D
 pub fn get_year_index(year: i64, month: u8, day: u8) -> u64 {
-  let mut number_of_days: u64 = 0;
-  for n in 1..month {
-    number_of_days += get_day_per_month(year, n);
-  }
-  number_of_days += u64::from(day);
-  number_of_days
+  let days_in_months = (1..month)
+    .map(|month| get_day_per_month(year, month))
+    .sum::<u64>();
+  days_in_months + day as u64
 }
 
 /// Returns a pair month/day knowing the index of the year
