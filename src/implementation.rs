@@ -6,7 +6,6 @@
 
 use std::error::Error;
 use std::fmt;
-use std::fmt::Write;
 
 const MAX_DAYS_YEAR: u64 = 366;
 
@@ -53,13 +52,8 @@ fn get_day_per_month(year: i64, month: u8) -> u64 {
   assert!(month > 0 && month < 13);
   match month {
     1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
-    2 => {
-      if is_year_leap(year) {
-        29
-      } else {
-        28
-      }
-    }
+    2 if is_year_leap(year) => 29,
+    2 => 28,
     _ => 30,
   }
 }
@@ -74,13 +68,13 @@ pub fn normalize_year(year: i64) -> i64 {
 pub fn check_if_raw_date_is_ok(year: i64, month: u8, day: u8) -> Result<(), DateError> {
   if year == 0 {
     return Err(DateError::InvalidYear);
-  };
+  }
   if month == 0 || month > 12 {
     return Err(DateError::InvalidMonth);
-  };
+  }
   if day == 0 || u64::from(day) > get_day_per_month(year, month) {
     return Err(DateError::InvalidDay);
-  };
+  }
   Ok(())
 }
 
