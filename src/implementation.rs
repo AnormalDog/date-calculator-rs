@@ -48,7 +48,6 @@ fn get_day_per_month(year: i32, month: u8) -> u32 {
 }
 
 /// returns the year, moving all negative years one number to right, being 1BC the 0, 2BC the -1...
-#[inline]
 pub fn normalize_year(year: i32) -> i32 {
   if year < 0 { year + 1 } else { year }
 }
@@ -101,10 +100,21 @@ pub fn add_n_month(date: &mut Date, n: u32) {
   date.remain = get_year_index(date.year, aux.0 as u8, aux.1);
 }
 
+/// Add n years
+pub fn add_n_years(date : &mut Date, n : u32) {
+  assert!(n < std::i32::MAX as u32);
+  date.year += n as i32;
+  // if the original year was leap and was 31 DEC, moves to 1 JAN and add 1 year
+  if date.remain > max_days_year(date.year) {
+    date.year += 1;
+    date.remain -= 1;
+  }
+}
+
 #[cfg(test)]
 mod impl_test {
   use crate::{
-    implementation::{add_n_days, add_n_month, get_date_standard, get_year_index}, Date
+    implementation::{add_n_days, add_n_month, add_n_years, get_date_standard, get_year_index}, Date
   };
 
   #[test]
@@ -137,6 +147,15 @@ mod impl_test {
     let mut x = Date::new(2000, 02, 28).unwrap();
     add_n_month(&mut x, 50);
     let y = Date::new(2004, 04, 28).unwrap();
+    assert_eq!(x.year, y.year);
+    assert_eq!(x.remain, y.remain);
+  }
+
+  #[test]
+  fn add_n_years_test() {
+    let mut x = Date::new(2000, 02, 29).unwrap();
+    add_n_years(&mut x, 4);
+    let y = Date::new(2004, 02, 29).unwrap();
     assert_eq!(x.year, y.year);
     assert_eq!(x.remain, y.remain);
   }
