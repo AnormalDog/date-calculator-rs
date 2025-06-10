@@ -7,7 +7,7 @@
 mod implementation;
 
 use crate::implementation::{
-  add_n_days, check_if_raw_date_is_ok, get_date_standard, get_year_index, is_year_leap, normalize_year
+  add_n_days, add_n_month, check_if_raw_date_is_ok, get_date_standard, get_year_index, is_year_leap, normalize_year
 };
 
 use std::fmt;
@@ -38,6 +38,12 @@ impl Date {
     add_n_days(self, days);
     self
   }
+
+  pub fn add_months(&mut self, months : u32) -> &Self {
+    add_n_month(self, months);
+    self
+  }
+
 }
 
 impl fmt::Display for Date {

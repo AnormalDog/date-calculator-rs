@@ -72,7 +72,7 @@ fn max_days_year(year: i64) -> u64 {
 }
 
 /// modify a Date struct adding n ammount of days
-pub fn add_n_days(date: &mut Date, n : u32) {
+pub fn add_n_days(date: &mut Date, n: u32) {
   let mut aux_sum = date.remain + (n as u64);
   while aux_sum > max_days_year(date.year) {
     aux_sum -= max_days_year(date.year);
@@ -80,10 +80,27 @@ pub fn add_n_days(date: &mut Date, n : u32) {
   }
   date.remain = aux_sum;
 }
+
+
+pub fn add_n_month(date: &mut Date, n: u32) {
+  let mut aux = get_date_standard(date.year, date.remain);
+  let mut month_aux = aux.0 as u32;
+  month_aux += n;
+  if month_aux > 12 {
+    date.year += (month_aux / 12) as i64;
+    month_aux %= 12;
+  }
+  aux.0 = month_aux as u8;
+  if aux.1 > get_day_per_month(date.year, aux.0) as u8 {
+    aux.1 = get_day_per_month(date.year, aux.0) as u8
+  }
+  date.remain = get_year_index(date.year, aux.0 as u8, aux.1);
+}
+
 #[cfg(test)]
 mod impl_test {
   use crate::{
-    implementation::{add_n_days, get_date_standard, get_year_index}, Date
+    implementation::{add_n_days, add_n_month, get_date_standard, get_year_index}, Date
   };
 
   #[test]
@@ -107,6 +124,15 @@ mod impl_test {
     let mut x = Date::new(2000, 02, 28).unwrap();
     add_n_days(&mut x, 10000);
     let y = Date::new(2027, 07, 16).unwrap();
+    assert_eq!(x.year, y.year);
+    assert_eq!(x.remain, y.remain);
+  }
+
+  #[test]
+  fn add_n_month_test() {
+    let mut x = Date::new(2000, 02, 28).unwrap();
+    add_n_month(&mut x, 50);
+    let y = Date::new(2004, 04, 28).unwrap();
     assert_eq!(x.year, y.year);
     assert_eq!(x.remain, y.remain);
   }
