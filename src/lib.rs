@@ -7,7 +7,7 @@
 mod implementation;
 
 use crate::implementation::{
-  check_if_raw_date_is_ok, get_date_standard, get_year_index, is_year_leap, normalize_year,
+  add_n_days, check_if_raw_date_is_ok, get_date_standard, get_year_index, is_year_leap, normalize_year
 };
 
 use std::fmt;
@@ -31,6 +31,12 @@ impl Date {
   /// Check if the date's year is leap
   pub fn is_leap(&self) -> bool {
     is_year_leap(self.year)
+  }
+
+  /// add an specify ammount of days
+  pub fn add_days(&mut self, days: u32) -> &Self {
+    add_n_days(self, days);
+    self
   }
 }
 

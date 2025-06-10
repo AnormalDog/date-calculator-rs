@@ -4,9 +4,7 @@
 //!
 //! Internal implementation of the library
 
-use crate::DateError;
-
-const MAX_DAYS_YEAR: u64 = 366;
+use crate::{Date, DateError};
 
 /// Returns true or false if the year is leap or not
 pub fn is_year_leap(year: i64) -> bool {
@@ -28,7 +26,7 @@ pub fn get_year_index(year: i64, month: u8, day: u8) -> u64 {
 
 /// Returns a pair month/day knowing the index of the year
 pub fn get_date_standard(year: i64, index: u64) -> (u8, u8) {
-  assert!(index < MAX_DAYS_YEAR && index > 0);
+  assert!(index < max_days_year(year) && index > 0);
   let mut total_number_of_days: u64 = index;
   let mut number_of_month: u64 = 1;
   while total_number_of_days > get_day_per_month(year, number_of_month as u8) {
@@ -68,9 +66,25 @@ pub fn check_if_raw_date_is_ok(year: i64, month: u8, day: u8) -> Result<(), Date
   }
 }
 
+/// Returns the max days a year can hold
+fn max_days_year(year: i64) -> u64 {
+  if is_year_leap(year) { 366 } else { 365 }
+}
+
+/// modify a Date struct adding n ammount of days
+pub fn add_n_days(date: &mut Date, n : u32) {
+  let mut aux_sum = date.remain + (n as u64);
+  while aux_sum > max_days_year(date.year) {
+    aux_sum -= max_days_year(date.year);
+    date.year += 1;
+  }
+  date.remain = aux_sum;
+}
 #[cfg(test)]
 mod impl_test {
-  use crate::implementation::{get_date_standard, get_year_index};
+  use crate::{
+    implementation::{add_n_days, get_date_standard, get_year_index}, Date
+  };
 
   #[test]
   fn get_year_index_test() {
@@ -86,5 +100,14 @@ mod impl_test {
     assert_eq!((02, 29), get_date_standard(2024, 060));
     assert_eq!((07, 18), get_date_standard(2024, 200));
     assert_eq!((07, 01), get_date_standard(2024, 183));
+  }
+
+  #[test]
+  fn add_n_days_test() {
+    let mut x = Date::new(2000, 02, 28).unwrap();
+    add_n_days(&mut x, 10000);
+    let y = Date::new(2027, 07, 16).unwrap();
+    assert_eq!(x.year, y.year);
+    assert_eq!(x.remain, y.remain);
   }
 }
