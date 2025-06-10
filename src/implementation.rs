@@ -7,7 +7,7 @@
 use crate::{Date, DateError};
 
 /// Returns true or false if the year is leap or not
-pub fn is_year_leap(year: i64) -> bool {
+pub fn is_year_leap(year: i32) -> bool {
   if year % 4 != 0 {
     return false;
   }
@@ -19,15 +19,15 @@ pub fn is_year_leap(year: i64) -> bool {
 
 /// Returns how many days have passed in the year
 ///   Basically converts Y/M/D to Y/D
-pub fn get_year_index(year: i64, month: u8, day: u8) -> u64 {
-  let days: u64 = (1..month).map(|n| get_day_per_month(year, n)).sum();
-  days + day as u64
+pub fn get_year_index(year: i32, month: u8, day: u8) -> u32 {
+  let days: u32 = (1..month).map(|n| get_day_per_month(year, n)).sum();
+  days + day as u32
 }
 
 /// Returns a pair month/day knowing the index of the year
-pub fn get_date_standard(year: i64, index: u64) -> (u8, u8) {
-  assert!(index < max_days_year(year) && index > 0);
-  let mut total_number_of_days: u64 = index;
+pub fn get_date_standard(year: i32, remain: u32) -> (u8, u8) {
+  assert!(remain < max_days_year(year) && remain > 0);
+  let mut total_number_of_days: u32 = remain;
   let mut number_of_month: u64 = 1;
   while total_number_of_days > get_day_per_month(year, number_of_month as u8) {
     total_number_of_days -= get_day_per_month(year, number_of_month as u8);
@@ -37,7 +37,7 @@ pub fn get_date_standard(year: i64, index: u64) -> (u8, u8) {
 }
 
 /// Returns the number of days a month has
-fn get_day_per_month(year: i64, month: u8) -> u64 {
+fn get_day_per_month(year: i32, month: u8) -> u32 {
   assert!(month > 0 && month < 13);
   match month {
     1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
@@ -49,31 +49,32 @@ fn get_day_per_month(year: i64, month: u8) -> u64 {
 
 /// returns the year, moving all negative years one number to right, being 1BC the 0, 2BC the -1...
 #[inline]
-pub fn normalize_year(year: i64) -> i64 {
+pub fn normalize_year(year: i32) -> i32 {
   if year < 0 { year + 1 } else { year }
 }
 
 /// Returns ok or a string with what was wrong first
-pub fn check_if_raw_date_is_ok(year: i64, month: u8, day: u8) -> Result<(), DateError> {
+pub fn check_if_raw_date_is_ok(year: i32, month: u8, day: u8) -> Result<(), DateError> {
   // check year
   if (year == 0)
     || (month == 0 || month > 12)
-    || (day == 0 || u64::from(day) > get_day_per_month(year, month))
+    || (day == 0 || day as u32 > get_day_per_month(year, month))
   {
-    Err(DateError::ErrorWrongRawData)
+    Err(DateError::InvalidRawData)
   } else {
     Ok(())
   }
 }
 
 /// Returns the max days a year can hold
-fn max_days_year(year: i64) -> u64 {
+fn max_days_year(year: i32) -> u32 {
   if is_year_leap(year) { 366 } else { 365 }
 }
 
-/// modify a Date struct adding n ammount of days
+/// Add n days to a date struct
 pub fn add_n_days(date: &mut Date, n: u32) {
-  let mut aux_sum = date.remain + (n as u64);
+  let mut aux_sum = date.remain + n;
+  // Can't be an if statement because years has a different number of days
   while aux_sum > max_days_year(date.year) {
     aux_sum -= max_days_year(date.year);
     date.year += 1;
@@ -81,16 +82,19 @@ pub fn add_n_days(date: &mut Date, n: u32) {
   date.remain = aux_sum;
 }
 
-
+/// Add n months.
+///   This fn requires to work with standard dates (Y/M/D) so us nire expensive
 pub fn add_n_month(date: &mut Date, n: u32) {
+  // standarize the Date
   let mut aux = get_date_standard(date.year, date.remain);
   let mut month_aux = aux.0 as u32;
   month_aux += n;
   if month_aux > 12 {
-    date.year += (month_aux / 12) as i64;
+    date.year += (month_aux / 12) as i32;
     month_aux %= 12;
   }
   aux.0 = month_aux as u8;
+  // in case the day is outside month limits, moves it to the limit (ejm: JAN-31 + 1 => FEB-28)
   if aux.1 > get_day_per_month(date.year, aux.0) as u8 {
     aux.1 = get_day_per_month(date.year, aux.0) as u8
   }

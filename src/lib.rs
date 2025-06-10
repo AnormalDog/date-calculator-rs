@@ -13,13 +13,13 @@ use crate::implementation::{
 use std::fmt;
 
 pub struct Date {
-  year: i64,
-  remain: u64,
+  year: i32,
+  remain: u32,
 }
 
 impl Date {
   /// Creates a new instance of Date
-  pub fn new(year: i64, month: u8, day: u8) -> Result<Self, DateError> {
+  pub fn new(year: i32, month: u8, day: u8) -> Result<Self, DateError> {
     check_if_raw_date_is_ok(year, month, day)?;
     let x = Date {
       year: normalize_year(year),
@@ -33,18 +33,20 @@ impl Date {
     is_year_leap(self.year)
   }
 
-  /// add an specify ammount of days
-  pub fn add_days(&mut self, days: u32) -> &Self {
-    add_n_days(self, days);
+  /// add an specified ammount of days
+  pub fn add_days(&mut self, n: u32) -> &Self {
+    add_n_days(self, n);
+    self
+    
+  }
+
+  // add an specified ammount of months
+  pub fn add_months(&mut self, n : u32) -> &Self {
+    add_n_month(self, n);
     self
   }
 
-  pub fn add_months(&mut self, months : u32) -> &Self {
-    add_n_month(self, months);
-    self
-  }
-
-}
+} // impl Date
 
 impl fmt::Display for Date {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -55,13 +57,13 @@ impl fmt::Display for Date {
 
 #[derive(Debug, Clone, Copy)]
 pub enum DateError {
-  ErrorWrongRawData,
+  InvalidRawData,
 }
 
 impl fmt::Display for DateError {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     match *self {
-      DateError::ErrorWrongRawData => f.write_str("The date introduced is wrong"),
+      DateError::InvalidRawData => f.write_str("The date introduced is wrong"),
     }
   }
 } // impl fmt::Display for DateError
