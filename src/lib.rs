@@ -15,6 +15,7 @@ use std::fmt;
 pub enum DateError {
   InvalidNewInput,
   OutOfLimits,
+  InternalError,
 }
 
 impl fmt::Display for DateError {
@@ -23,7 +24,8 @@ impl fmt::Display for DateError {
       DateError::InvalidNewInput => f.write_str("Invalid input introducing values to NEW"),
       DateError::OutOfLimits => {
         f.write_str("the date is outside of the limits (-9999 - 9999) years")
-      }
+      },
+      DateError::InternalError => f.write_str("internal error, found a weird number in index")
     }
   }
 }
@@ -46,7 +48,7 @@ impl Date {
     validate_raw(year, month, day)?;
     let year = normalize_year(year);
     let x = Date {
-      year: year,
+      year,
       index: year_index(year, month, day),
     };
     Ok(x)

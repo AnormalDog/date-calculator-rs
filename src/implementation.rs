@@ -35,7 +35,7 @@ fn days_per_year(year: i32) -> u32 {
 
 /// validates if the raw data is correct
 pub fn validate_raw(year: i32, month: u32, day: u32) -> Result<(), DateError> {
-  if year < -9999 || year > 9999 {
+  if !(-9999..=9999).contains(&year) {
     Err(DateError::OutOfLimits)
   } else if (year == 0)
     || (month == 0)
@@ -51,9 +51,10 @@ pub fn validate_raw(year: i32, month: u32, day: u32) -> Result<(), DateError> {
 
 /// Validate the current state of the instance
 pub fn validate(date: &Date) -> Result<(), DateError> {
-  if date.index < days_per_year(date.year) {}
-  assert!(date.index < days_per_year(date.year));
-  if date.year > 9999 || date.year < -9998 {
+  if date.index < days_per_year(date.year) {
+    Err(DateError::InternalError)
+  }
+  else if date.year > 9999 || date.year < -9998 {
     Err(DateError::OutOfLimits)
   } else {
     Ok(())
@@ -68,7 +69,7 @@ pub fn year_index(year: i32, month: u32, day: u32) -> u32 {
 /// Move all BC(negative) years one number to right, making the 1BC the 0, the 2BC the -1...
 pub fn normalize_year(year: i32) -> i32 {
   assert_ne!(year, 0);
-  assert!(year >= -9999 && year <= 9999);
+  assert!(!(-9999..=9999).contains(&year));
   if year < 0 { year + 1 } else { year }
 }
 
@@ -118,20 +119,12 @@ fn standarized_months_day(date: &Date) -> (u32, u32) {
 #[cfg(test)]
 mod implementation_test {
   use crate::Date;
-  use crate::implementation::{add_n_days, add_n_months, standarized_months_day, validate_raw};
+  use crate::implementation::{add_n_days, add_n_months, add_n_years, standarized_months_day, validate_raw};
   #[test]
   fn validate_raw_test() {
     validate_raw(10000, 5, 12).expect_err("correct error");
     validate_raw(2000, 2, 29).expect("correct no error");
     validate_raw(1, 2, 29).expect_err("correct error");
-  }
-
-  #[test]
-  fn add_days_test() {
-    let mut y = Date::new(2000, 2, 29).expect("error creating the obj test");
-    add_n_days(&mut y, 1000);
-    let z = Date::new(2002, 11, 25).expect("error creating the obj test");
-    assert_eq!(y, z);
   }
 
   #[test]
@@ -141,10 +134,26 @@ mod implementation_test {
   }
 
   #[test]
+  fn add_days_test() {
+    let mut y = Date::new(2000, 2, 29).expect("error creating instance in test");
+    add_n_days(&mut y, 1000);
+    let z = Date::new(2002, 11, 25).expect("error creating instance in test");
+    assert_eq!(y, z);
+  }
+
+  #[test]
   fn add_n_months_test() {
     let mut x = Date::new(2000, 2, 20).expect("error creating instance in test");
     let expected = Date::new(2001, 5, 20).expect("error creating instance in test");
     add_n_months(&mut x, 15);
+    assert_eq!(x, expected);
+  }
+
+  #[test]
+  fn add_n_years_test() {
+    let mut x = Date::new(2000, 12, 31).expect("error creating instance in test");
+    let expected = Date::new(2005, 12, 31).expect("error creating instance in test");
+    add_n_years(&mut x, 2);
     assert_eq!(x, expected);
   }
 } // mod implementation_test
