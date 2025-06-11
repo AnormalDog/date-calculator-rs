@@ -51,6 +51,7 @@ pub fn validate_raw(year: i32, month: u32, day: u32) -> Result<(), DateError> {
 
 /// Validate the current state of the instance
 pub fn validate(date: &Date) -> Result<(), DateError> {
+  if date.index < days_per_year(date.year) {}
   assert!(date.index < days_per_year(date.year));
   if date.year > 9999 || date.year < -9998 {
     Err(DateError::OutOfLimits)
@@ -80,10 +81,35 @@ pub fn add_n_days(date: &mut Date, n: u32) {
   }
 }
 
+/// Add n months. Requires to standarize the Date, so is more expensive
+pub fn add_n_months(date: &mut Date, n: u32) {
+  let mut standard = standarized_months_day(date);
+  standard.0 += n;
+  while standard.0 > 12 {
+    date.year += 1;
+    standard.0 -= 12;
+  }
+  if standard.1 > days_per_month(date.year, standard.0) {
+    standard.1 = days_per_month(date.year, standard.0);
+  }
+  date.index = year_index(date.year, standard.0, standard.1);
+}
+
+fn standarized_months_day(date: &Date) -> (u32, u32) {
+  assert!(date.index <= days_per_year(date.year));
+  let mut index_aux: u32 = date.index;
+  let mut month_index: u32 = 1;
+  while index_aux > days_per_month(date.year, month_index) {
+    index_aux -= days_per_month(date.year, month_index);
+    month_index += 1;
+  }
+  (month_index, index_aux)
+}
+
 #[cfg(test)]
 mod implementation_test {
-  use crate::{Date, DateError};
-  use crate::implementation::{add_n_days, validate_raw};
+  use crate::Date;
+  use crate::implementation::{add_n_days, add_n_months, standarized_months_day, validate_raw};
   #[test]
   fn validate_raw_test() {
     validate_raw(10000, 5, 12).expect_err("correct error");
@@ -97,5 +123,19 @@ mod implementation_test {
     add_n_days(&mut y, 1000);
     let z = Date::new(2002, 11, 25).expect("error creating the obj test");
     assert_eq!(y, z);
+  }
+
+  #[test]
+  fn standarized_months_day_test() {
+    let x = Date::new(2000, 12, 31).expect("error creating instance in test");
+    assert_eq!(standarized_months_day(&x), (12, 31));
+  }
+
+  #[test]
+  fn add_n_months_test() {
+    let mut x = Date::new(2000, 2, 20).expect("error creating instance in test");
+    let expected = Date::new(2001, 5, 20).expect("error creating instance in test");
+    add_n_months(&mut x, 15);
+    assert_eq!(x, expected);
   }
 }

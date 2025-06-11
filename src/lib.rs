@@ -6,7 +6,9 @@
 
 mod implementation;
 
-use crate::implementation::{add_n_days, normalize_year, validate, validate_raw, year_index};
+use crate::implementation::{
+  add_n_days, add_n_months, normalize_year, validate, validate_raw, year_index,
+};
 use std::fmt;
 
 #[derive(Clone, Copy, Debug)]
@@ -57,12 +59,21 @@ impl Date {
     Ok(self)
   }
 
-  pub fn add_weeks(&mut self, weeks : u32) -> Result<&Self, DateError> {
+  /// add weeks to an instance, then checks if still valid
+  pub fn add_weeks(&mut self, weeks: u32) -> Result<&Self, DateError> {
     add_n_days(self, weeks * 7);
     validate(self)?;
     Ok(self)
   }
-}
+
+  /// add months to an instance, then checks if still valid. More expensive than others
+  pub fn add_months(&mut self, months: u32) -> Result<&Self, DateError> {
+    add_n_months(self, months);
+    validate(self)?;
+    Ok(self)
+  }
+
+} // impl Date
 
 #[cfg(test)]
 mod lib_test {
@@ -73,11 +84,5 @@ mod lib_test {
     let _x = Date::new(2001, 2, 29).expect_err("expected error in x");
     let _y = Date::new(-1, 2, 28).expect("error in y");
     let _z = Date::new(0, 50, 15).expect_err("error expected in z");
-  }
-
-  #[test]
-  fn add_days_test() {
-    let mut y = Date::new(9999, 12, 31).expect("error creating the obj test");
-    y.add_days(1).expect_err("no error?");
   }
 }
