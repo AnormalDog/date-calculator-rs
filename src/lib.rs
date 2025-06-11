@@ -17,7 +17,7 @@ pub enum DateError {
 
 impl fmt::Display for DateError {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    match *self {
+    match self {
       DateError::InvalidNewInput => f.write_str("Invalid input introducing values to NEW"),
       DateError::OutOfLimits => {
         f.write_str("the date is outside of the limits (-9999 - 9999) years")
@@ -53,6 +53,12 @@ impl Date {
   /// Add days to an instance, then checks if still valid
   pub fn add_days(&mut self, days: u32) -> Result<&Self, DateError> {
     add_n_days(self, days);
+    validate(self)?;
+    Ok(self)
+  }
+
+  pub fn add_weeks(&mut self, weeks : u32) -> Result<&Self, DateError> {
+    add_n_days(self, weeks * 7);
     validate(self)?;
     Ok(self)
   }
