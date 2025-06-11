@@ -95,6 +95,15 @@ pub fn add_n_months(date: &mut Date, n: u32) {
   date.index = year_index(date.year, standard.0, standard.1);
 }
 
+/// Add n years
+pub fn add_n_years(date: &mut Date, n: u32) {
+  date.year += n as i32;
+  if date.index > days_per_year(date.year) {
+    date.index = days_per_year(date.year);
+  }
+}
+
+/// Converts from D -> M/D
 fn standarized_months_day(date: &Date) -> (u32, u32) {
   assert!(date.index <= days_per_year(date.year));
   let mut index_aux: u32 = date.index;
@@ -138,4 +147,4 @@ mod implementation_test {
     add_n_months(&mut x, 15);
     assert_eq!(x, expected);
   }
-}
+} // mod implementation_test

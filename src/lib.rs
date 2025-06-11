@@ -7,7 +7,7 @@
 mod implementation;
 
 use crate::implementation::{
-  add_n_days, add_n_months, normalize_year, validate, validate_raw, year_index,
+  add_n_days, add_n_months, add_n_years, normalize_year, validate, validate_raw, year_index,
 };
 use std::fmt;
 
@@ -73,6 +73,12 @@ impl Date {
     Ok(self)
   }
 
+  /// add years to an instance, then checks if still valid.
+  pub fn add_years(&mut self, years: u32) -> Result<&Self, DateError> {
+    add_n_years(self, years);
+    validate(self)?;
+    Ok(self)
+  }
 } // impl Date
 
 #[cfg(test)]
@@ -85,4 +91,4 @@ mod lib_test {
     let _y = Date::new(-1, 2, 28).expect("error in y");
     let _z = Date::new(0, 50, 15).expect_err("error expected in z");
   }
-}
+} // mod lib_test

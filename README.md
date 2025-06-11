@@ -6,14 +6,13 @@ Library that implements functions for date operations
 WIP
 
 ## Planned functions implementations
-- [x] new.
+- [x] New.
+- [x] Validate. 
 - [ ] Count days between two dates.
-- [ ] Add/Substract days.
-- [ ] Add/Substract weeks.
-- [ ] Add/Substract months.
-- [ ] Add/Substract years.
-- [x] is date's year leap.
-- [ ] more
+- [x] Add days/weeks/months/years.
+- [ ] Delete days/weeks/months/years.
+- [x] Is date's year leap.
+- [ ] More...
 
 ## LICENSE
 [MIT](https://choosealicense.com/licenses/mit/)
