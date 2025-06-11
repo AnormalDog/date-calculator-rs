@@ -56,29 +56,37 @@ impl Date {
 
   /// Add days to an instance, then checks if still valid
   pub fn add_days(&mut self, days: u32) -> Result<&Self, DateError> {
-    add_n_days(self, days);
-    validate(self)?;
+    let mut aux = *self;
+    add_n_days(&mut aux, days);
+    validate(&aux)?;
+    *self = aux;
     Ok(self)
   }
 
   /// add weeks to an instance, then checks if still valid
   pub fn add_weeks(&mut self, weeks: u32) -> Result<&Self, DateError> {
-    add_n_days(self, weeks * 7);
-    validate(self)?;
+    let mut aux = *self;
+    add_n_days(&mut aux, weeks * 7);
+    validate(&aux)?;
+    *self = aux;
     Ok(self)
   }
 
   /// add months to an instance, then checks if still valid. More expensive than others
   pub fn add_months(&mut self, months: u32) -> Result<&Self, DateError> {
-    add_n_months(self, months);
-    validate(self)?;
+        let mut aux = *self;
+    add_n_months(&mut aux, months);
+    validate(&aux)?;
+    *self = aux;
     Ok(self)
   }
 
   /// add years to an instance, then checks if still valid.
   pub fn add_years(&mut self, years: u32) -> Result<&Self, DateError> {
-    add_n_years(self, years);
-    validate(self)?;
+    let mut aux = *self;
+    add_n_years(&mut aux, years);
+    validate(&aux)?;
+    *self = aux;
     Ok(self)
   }
 } // impl Date
@@ -92,5 +100,13 @@ mod lib_test {
     let _x = Date::new(2001, 2, 29).expect_err("expected error in x");
     let _y = Date::new(-1, 2, 28).expect("error in y");
     let _z = Date::new(0, 50, 15).expect_err("error expected in z");
+  }
+
+  #[test]
+  fn add_test() {
+    let mut x = Date::new(2000, 2, 29).expect("error creating instance in test");
+    let y = x;
+    x.add_years(10000).expect_err("msg");
+    assert_eq!(x, y);
   }
 } // mod lib_test

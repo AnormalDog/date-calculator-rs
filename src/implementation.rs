@@ -69,7 +69,7 @@ pub fn year_index(year: i32, month: u32, day: u32) -> u32 {
 /// Move all BC(negative) years one number to right, making the 1BC the 0, the 2BC the -1...
 pub fn normalize_year(year: i32) -> i32 {
   assert_ne!(year, 0);
-  assert!(!(-9999..=9999).contains(&year));
+  assert!((-9999..=9999).contains(&year));
   if year < 0 { year + 1 } else { year }
 }
 
@@ -152,7 +152,7 @@ mod implementation_test {
   #[test]
   fn add_n_years_test() {
     let mut x = Date::new(2000, 12, 31).expect("error creating instance in test");
-    let expected = Date::new(2005, 12, 31).expect("error creating instance in test");
+    let expected = Date::new(2002, 12, 31).expect("error creating instance in test");
     add_n_years(&mut x, 2);
     assert_eq!(x, expected);
   }
