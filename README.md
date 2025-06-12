@@ -14,7 +14,7 @@ All is around the struct Date, with a range of 9999BC to 9999AC.
 - [x]  New.
 - [x]  Validate. 
 - [x]  Add days/weeks/months/years.
-- [ ]  Delete days/weeks/months/years.
+- [x]  Delete days/weeks/months/years.
 - [ ]  Count days between two dates.
 - [ ]  What day of the week is.
 ## LICENSE
