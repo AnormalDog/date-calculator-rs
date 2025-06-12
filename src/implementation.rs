@@ -51,7 +51,7 @@ pub fn validate_raw(year: i32, month: u32, day: u32) -> Result<(), DateError> {
 
 /// Validate the current state of the instance
 pub fn validate(date: &Date) -> Result<(), DateError> {
-  if date.index < days_per_year(date.year) {
+  if date.index > days_per_year(date.year) {
     Err(DateError::InternalError)
   }
   else if date.year > 9999 || date.year < -9998 {
@@ -80,9 +80,10 @@ pub fn add_n_days(date: &mut Date, n: u32) {
     date.index -= days_per_year(date.year);
     date.year += 1;
   }
+  assert!((1..=days_per_year(date.year)).contains(&date.index));
 }
 
-/// Add n months. Requires to standarize the Date, so is more expensive
+/// Add n months. Requires to standarize the Date, so is more expensive.
 pub fn add_n_months(date: &mut Date, n: u32) {
   let mut standard = standarized_months_day(date);
   standard.0 += n;
@@ -90,6 +91,7 @@ pub fn add_n_months(date: &mut Date, n: u32) {
     date.year += 1;
     standard.0 -= 12;
   }
+  assert!((1..=12).contains(&standard.0));
   if standard.1 > days_per_month(date.year, standard.0) {
     standard.1 = days_per_month(date.year, standard.0);
   }
@@ -124,13 +126,32 @@ pub fn remove_n_days(date: &mut Date, n: u32) {
     date.year -= 1;
     substraction += days_per_year(date.year) as i64;
   }
+  assert!((1..=days_per_year(date.year)).contains(&(substraction as u32)));
   date.index = substraction.abs() as u32;
 }
+
+/// Remove n months. Requires to standarize the Date, so is more expensive
+pub fn remove_n_months(date: &mut Date, n: u32) {
+  let standard = standarized_months_day(date);
+  let mut months : i64 = standard.0 as i64;
+  let mut days : u32 = standard.1;
+  months -= n as i64;
+  while months < 1 {
+    date.year -= 1;
+    months += 12;
+  }
+  assert!((1..=12).contains(&months));
+  if days > days_per_month(date.year, months as u32) {
+    days = days_per_month(date.year, months as u32);
+  }
+  date.index = year_index(date.year, months as u32, days);
+}
+
 
 #[cfg(test)]
 mod implementation_test {
   use crate::Date;
-  use crate::implementation::{add_n_days, add_n_months, add_n_years, standarized_months_day, validate_raw, remove_n_days};
+  use crate::implementation::{add_n_days, add_n_months, add_n_years, standarized_months_day, validate_raw, remove_n_days, remove_n_months};
   #[test]
   fn validate_raw_test() {
     validate_raw(10000, 5, 12).expect_err("correct error");
@@ -173,6 +194,14 @@ mod implementation_test {
     let mut x = Date::new(2000, 12, 31).expect("error creating instance in test");
     let expected = Date::new(1999, 12, 31).expect("error creating instance in test");
     remove_n_days(&mut x,366);
+    assert_eq!(x, expected);
+  }
+
+  #[test]
+  fn remove_n_months_test() {
+    let mut x = Date::new(2000, 12, 31).expect("error creating instance in test");
+    let expected = Date::new(1984, 4, 30).expect("error creating instance in test");
+    remove_n_months(&mut x, 200);
     assert_eq!(x, expected);
   }
 } // mod implementation_test

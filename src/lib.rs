@@ -7,7 +7,7 @@
 mod implementation;
 
 use crate::implementation::{
-  add_n_days, add_n_months, add_n_years, normalize_year, remove_n_days, validate, validate_raw, year_index
+  add_n_days, add_n_months, add_n_years, normalize_year, remove_n_days, validate, validate_raw, year_index, remove_n_months
 };
 use std::fmt;
 
@@ -55,7 +55,7 @@ impl Date {
   }
 
   /// Checks if the result is valid, then add n days.
-  pub fn add_days(&mut self, days: u32) -> Result<&Self, DateError> {
+  pub fn add_days(&mut self, days: u32) -> Result<&mut Self, DateError> {
     let mut aux = self.clone();
     add_n_days(&mut aux, days);
     validate(&aux)?;
@@ -64,7 +64,7 @@ impl Date {
   }
 
   /// Checks if the result is valid, then add n weeks.
-  pub fn add_weeks(&mut self, weeks: u32) -> Result<&Self, DateError> {
+  pub fn add_weeks(&mut self, weeks: u32) -> Result<&mut Self, DateError> {
     let mut aux = self.clone();
     add_n_days(&mut aux, weeks * 7);
     validate(&aux)?;
@@ -73,7 +73,7 @@ impl Date {
   }
 
   /// Checks if the result is valid, then add n months. More expensive than others.
-  pub fn add_months(&mut self, months: u32) -> Result<&Self, DateError> {
+  pub fn add_months(&mut self, months: u32) -> Result<&mut Self, DateError> {
     let mut aux = self.clone();
     add_n_months(&mut aux, months);
     validate(&aux)?;
@@ -82,7 +82,7 @@ impl Date {
   }
 
   /// Checks if the result is valid, then add n years.
-  pub fn add_years(&mut self, years: u32) -> Result<&Self, DateError> {
+  pub fn add_years(&mut self, years: u32) -> Result<&mut Self, DateError> {
     let mut aux = self.clone();
     add_n_years(&mut aux, years);
     validate(&aux)?;
@@ -90,8 +90,8 @@ impl Date {
     Ok(self)
   }
 
-  /// Check if the result is valid, then remove n days
-  pub fn remove_days(&mut self, days: u32) -> Result<&Self, DateError> {
+  /// Check if the result is valid, then remove n days.
+  pub fn remove_days(&mut self, days: u32) -> Result<&mut Self, DateError> {
     let mut aux = self.clone();
     remove_n_days(&mut aux, days);
     validate(&aux)?;
@@ -99,14 +99,24 @@ impl Date {
     Ok(self)
   }
 
-  /// Check if the result is valid, then remove n weeks
-  pub fn remove_weeks(&mut self, days: u32) -> Result<&Self, DateError> {
-    let mut aux = *self;
+  /// Check if the result is valid, then remove n weeks.
+  pub fn remove_weeks(&mut self, days: u32) -> Result<&mut Self, DateError> {
+    let mut aux = self.clone();
     remove_n_days(&mut aux, days * 7);
     validate(&aux)?;
     *self = aux;
     Ok(self)
   }
+
+  /// Checks if the result is valid, then remove n months. More expensive than others.
+  pub fn remove_months(&mut self, months: u32) -> Result<&mut Self, DateError> {
+    let mut aux = self.clone();
+    remove_n_months(&mut aux, months);
+    validate(&aux)?;
+    *self = aux;
+    Ok(self)
+  }
+
 } // impl Date
 
 #[cfg(test)]
@@ -126,5 +136,14 @@ mod lib_test {
     let y = x;
     x.add_years(10000).expect_err("msg");
     assert_eq!(x, y);
+  }
+
+  #[test]
+  fn multiple_operation_test() {
+    let mut x = Date::new(2000, 2, 29).expect("error creating instance in test");
+    let expected = x.clone();
+    x.add_days(50).expect("error adding").add_weeks(5).expect("error adding");
+    x.remove_days(50).expect("error removing").remove_weeks(5).expect("error removing");
+    assert_eq!(x, expected);
   }
 } // mod lib_test
