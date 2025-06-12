@@ -7,7 +7,7 @@
 mod implementation;
 
 use crate::implementation::{
-  add_n_days, add_n_months, add_n_years, normalize_year, validate, validate_raw, year_index,
+  add_n_days, add_n_months, add_n_years, normalize_year, remove_n_days, validate, validate_raw, year_index
 };
 use std::fmt;
 
@@ -43,7 +43,7 @@ impl fmt::Display for Date {
 }
 
 impl Date {
-  /// Create a new instance of Date
+  /// Create a new instance of Date.
   pub fn new(year: i32, month: u32, day: u32) -> Result<Date, DateError> {
     validate_raw(year, month, day)?;
     let year = normalize_year(year);
@@ -54,7 +54,7 @@ impl Date {
     Ok(x)
   }
 
-  /// Add days to an instance, then checks if still valid
+  /// checks if the result is valid, then add n days.
   pub fn add_days(&mut self, days: u32) -> Result<&Self, DateError> {
     let mut aux = *self;
     add_n_days(&mut aux, days);
@@ -63,7 +63,7 @@ impl Date {
     Ok(self)
   }
 
-  /// add weeks to an instance, then checks if still valid
+  /// checks if the result is valid, then add n weeks.
   pub fn add_weeks(&mut self, weeks: u32) -> Result<&Self, DateError> {
     let mut aux = *self;
     add_n_days(&mut aux, weeks * 7);
@@ -72,19 +72,28 @@ impl Date {
     Ok(self)
   }
 
-  /// add months to an instance, then checks if still valid. More expensive than others
+  /// checks if the result is valid, then add n months. More expensive than others.
   pub fn add_months(&mut self, months: u32) -> Result<&Self, DateError> {
-        let mut aux = *self;
+    let mut aux = *self;
     add_n_months(&mut aux, months);
     validate(&aux)?;
     *self = aux;
     Ok(self)
   }
 
-  /// add years to an instance, then checks if still valid.
+  /// checks if the result is valid, then add n years.
   pub fn add_years(&mut self, years: u32) -> Result<&Self, DateError> {
     let mut aux = *self;
     add_n_years(&mut aux, years);
+    validate(&aux)?;
+    *self = aux;
+    Ok(self)
+  }
+
+  /// check if the result is valid, then remove n days
+  pub fn remove_days(&mut self, days : u32) -> Result<&Self, DateError> {
+    let mut aux = *self;
+    remove_n_days(&mut aux, days);
     validate(&aux)?;
     *self = aux;
     Ok(self)
