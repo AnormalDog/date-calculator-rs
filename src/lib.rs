@@ -98,6 +98,15 @@ impl Date {
     *self = aux;
     Ok(self)
   }
+
+  /// Check if the result is valid, then remove n weeks
+  pub fn remove_weeks(&mut self, days: u32) -> Result<&Self, DateError> {
+    let mut aux = *self;
+    remove_n_days(&mut aux, days * 7);
+    validate(&aux)?;
+    *self = aux;
+    Ok(self)
+  }
 } // impl Date
 
 #[cfg(test)]
