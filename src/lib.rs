@@ -54,45 +54,45 @@ impl Date {
     Ok(x)
   }
 
-  /// checks if the result is valid, then add n days.
+  /// Checks if the result is valid, then add n days.
   pub fn add_days(&mut self, days: u32) -> Result<&Self, DateError> {
-    let mut aux = *self;
+    let mut aux = self.clone();
     add_n_days(&mut aux, days);
     validate(&aux)?;
     *self = aux;
     Ok(self)
   }
 
-  /// checks if the result is valid, then add n weeks.
+  /// Checks if the result is valid, then add n weeks.
   pub fn add_weeks(&mut self, weeks: u32) -> Result<&Self, DateError> {
-    let mut aux = *self;
+    let mut aux = self.clone();
     add_n_days(&mut aux, weeks * 7);
     validate(&aux)?;
     *self = aux;
     Ok(self)
   }
 
-  /// checks if the result is valid, then add n months. More expensive than others.
+  /// Checks if the result is valid, then add n months. More expensive than others.
   pub fn add_months(&mut self, months: u32) -> Result<&Self, DateError> {
-    let mut aux = *self;
+    let mut aux = self.clone();
     add_n_months(&mut aux, months);
     validate(&aux)?;
     *self = aux;
     Ok(self)
   }
 
-  /// checks if the result is valid, then add n years.
+  /// Checks if the result is valid, then add n years.
   pub fn add_years(&mut self, years: u32) -> Result<&Self, DateError> {
-    let mut aux = *self;
+    let mut aux = self.clone();
     add_n_years(&mut aux, years);
     validate(&aux)?;
     *self = aux;
     Ok(self)
   }
 
-  /// check if the result is valid, then remove n days
-  pub fn remove_days(&mut self, days : u32) -> Result<&Self, DateError> {
-    let mut aux = *self;
+  /// Check if the result is valid, then remove n days
+  pub fn remove_days(&mut self, days: u32) -> Result<&Self, DateError> {
+    let mut aux = self.clone();
     remove_n_days(&mut aux, days);
     validate(&aux)?;
     *self = aux;

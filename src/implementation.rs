@@ -171,8 +171,8 @@ mod implementation_test {
   #[test]
   fn remove_n_days_test() {
     let mut x = Date::new(2000, 12, 31).expect("error creating instance in test");
-    let expected = Date::new(1988, 1, 15).expect("error creating instance in test");
-    remove_n_days(&mut x,4734);
+    let expected = Date::new(1999, 12, 31).expect("error creating instance in test");
+    remove_n_days(&mut x,366);
     assert_eq!(x, expected);
   }
 } // mod implementation_test
