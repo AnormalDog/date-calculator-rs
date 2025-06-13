@@ -7,8 +7,7 @@
 mod implementation;
 
 use crate::implementation::{
-  add_n_days, add_n_months, add_n_years, normalize_year, remove_n_days, remove_n_months,
-  remove_n_years, validate, validate_raw, year_index,
+  add_n_days, add_n_months, add_n_years, date_index, normalize_year, remove_n_days, remove_n_months, remove_n_years, validate, validate_raw, year_index
 };
 use std::fmt;
 
@@ -126,6 +125,11 @@ impl Date {
     *self = aux;
     Ok(self)
   }
+
+  /// Returns the number of days between two Dates. If date1 is after date2, the result will be negative
+  pub fn days_between(date1: &Date, date2: &Date) -> i64 {
+    date_index(date2) - date_index(date1)
+  }
 } // impl Date
 
 #[cfg(test)]
@@ -160,5 +164,13 @@ mod lib_test {
       .remove_weeks(5)
       .expect("error removing");
     assert_eq!(x, expected);
+  }
+
+  #[test]
+  fn days_between_test() {    
+    let x: Date = Date::new(2000, 1, 1).expect("error creating instance in test");
+    let y = Date::new(2005, 3, 30).expect("error creating instance in test");
+    assert_eq!(1915, Date::days_between(&x, &y));
+    assert_eq!(-1915, Date::days_between(&y, &x));
   }
 } // mod lib_test

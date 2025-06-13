@@ -6,6 +6,8 @@
 
 use crate::{Date, DateError};
 
+const REFERENCE_DATE: Date = Date { year: 1, index: 1 };
+
 /// Returns true is the year is leap
 fn is_year_leap(year: i32) -> bool {
   if year % 4 != 0 {
@@ -153,12 +155,47 @@ pub fn remove_n_years(date: &mut Date, n: u32) {
   }
 }
 
+/// Returns the number of days that have happened since the REFERENCE_DATE
+pub fn date_index(date: &Date) -> i64 {
+  let mut sum: u64;
+  if date.year >= 0 {
+    sum = (REFERENCE_DATE.year..date.year)
+      .map(|x| days_per_year(x) as u64)
+      .sum();
+  } else {
+    sum = (date.year..REFERENCE_DATE.year)
+      .map(|x| days_per_year(x) as u64)
+      .sum();
+  }
+  sum += (date.index - REFERENCE_DATE.index) as u64;
+  if is_date_before(date, &REFERENCE_DATE) {
+    sum as i64 * -1
+  } else {
+    sum as i64
+  }
+}
+
+/// Returns true if date1 is before date2
+fn is_date_before(date1: &Date, date2: &Date) -> bool {
+  if date1.year < date2.year {
+    true
+  } else if date1.year > date2.year {
+    false
+  } else {
+    if date1.index < date2.index {
+      true
+    } else {
+      false
+    }
+  }
+}
+
 #[cfg(test)]
 mod implementation_test {
   use crate::Date;
   use crate::implementation::{
-    add_n_days, add_n_months, add_n_years, remove_n_days, remove_n_months, remove_n_years,
-    standarized_months_day, validate_raw,
+    add_n_days, add_n_months, add_n_years, date_index, remove_n_days, remove_n_months,
+    remove_n_years, standarized_months_day, validate_raw,
   };
   #[test]
   fn validate_raw_test() {
@@ -219,5 +256,13 @@ mod implementation_test {
     let expected = Date::new(1801, 12, 31).expect("error creating instance in test");
     remove_n_years(&mut x, 199);
     assert_eq!(x, expected);
+  }
+
+  #[test]
+  fn date_index_test() {
+    assert_eq!(-184813, date_index(&Date::new(-506, 1, 1).expect("error creating instance in test")));
+    assert_eq!(0, date_index(&Date::new(1, 1, 1).expect("error creating instance in test")));
+    assert_eq!(365026, date_index(&Date::new(1000, 5, 30).expect("error creating instance in test")));
+    assert_eq!(1310776, date_index(&Date::new(3589, 10, 14).expect("error creating instance in test")));
   }
 } // mod implementation_test
