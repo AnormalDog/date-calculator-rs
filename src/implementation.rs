@@ -74,6 +74,16 @@ pub fn normalize_year(year: i32) -> i32 {
   if year < 0 { year + 1 } else { year }
 }
 
+/// Reverse operation to normalize_year
+pub fn standarize_year(year: i32) -> i32 {
+  if year <= 0 {
+    year -1
+  }
+  else {
+    year
+  }
+}
+
 /// Add n days
 pub fn add_n_days(date: &mut Date, n: u32) {
   date.index += n;
@@ -158,7 +168,7 @@ pub fn remove_n_years(date: &mut Date, n: u32) {
 /// Returns the number of days that have happened since the REFERENCE_DATE
 pub fn date_index(date: &Date) -> i64 {
   let mut sum: u64;
-  if date.year >= 0 {
+  if date.year > 0 {
     sum = (REFERENCE_DATE.year..date.year)
       .map(|x| days_per_year(x) as u64)
       .sum();
@@ -169,7 +179,7 @@ pub fn date_index(date: &Date) -> i64 {
   }
   sum += (date.index - REFERENCE_DATE.index) as u64;
   if is_date_before(date, &REFERENCE_DATE) {
-    sum as i64 * -1
+    -(sum as i64)
   } else {
     sum as i64
   }
@@ -182,20 +192,53 @@ fn is_date_before(date1: &Date, date2: &Date) -> bool {
   } else if date1.year > date2.year {
     false
   } else {
-    if date1.index < date2.index {
-      true
-    } else {
-      false
-    }
+    date1.index < date2.index
   }
+}
+
+const MONTH_OFFSET: [i32; 12] = [0, 3, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5];
+const MONTH_OFFSET_LEAP: [i32; 12] = [0, 3, 4, 0, 2, 5, 0, 3, 6, 1, 4, 6];
+
+fn gauss_algorithm_weekday_normalizer(weekday: u8) -> u8 {
+  assert!(weekday < 7);
+  match weekday {
+    0 => 6, // sunday
+    1 => 0, // monday
+    2 => 1, // tuesday
+    3 => 2, // weknesday
+    4 => 3, // thursday
+    5 => 4, // friday
+    _ => 5, // saturday
+  }
+}
+
+fn gauss_algorithm(date: &Date) -> u8 {
+  let month_day = standarized_months_day(date);
+  let index = (month_day.0 - 1) as usize;
+  let offset = {
+    if is_year_leap(date.year) {
+      MONTH_OFFSET_LEAP[index]
+    } else {
+      MONTH_OFFSET[index]
+    }
+  };
+  //println!("day: {}", month_day.1);
+  let d: i32 = (month_day.1 as i32
+    + offset
+    + 5 * ((date.year - 1) % 4)
+    + 4 * ((date.year - 1) % 100)
+    + 6 * ((date.year - 1) % 400))
+    % 7;
+  //println!("d: {d}");
+  gauss_algorithm_weekday_normalizer(d as u8)
 }
 
 #[cfg(test)]
 mod implementation_test {
   use crate::Date;
   use crate::implementation::{
-    add_n_days, add_n_months, add_n_years, date_index, remove_n_days, remove_n_months,
-    remove_n_years, standarized_months_day, validate_raw,
+    add_n_days, add_n_months, add_n_years, date_index, gauss_algorithm, remove_n_days,
+    remove_n_months, remove_n_years, standarized_months_day, validate_raw,
   };
   #[test]
   fn validate_raw_test() {
@@ -260,9 +303,34 @@ mod implementation_test {
 
   #[test]
   fn date_index_test() {
-    assert_eq!(-184813, date_index(&Date::new(-506, 1, 1).expect("error creating instance in test")));
-    assert_eq!(0, date_index(&Date::new(1, 1, 1).expect("error creating instance in test")));
-    assert_eq!(365026, date_index(&Date::new(1000, 5, 30).expect("error creating instance in test")));
-    assert_eq!(1310776, date_index(&Date::new(3589, 10, 14).expect("error creating instance in test")));
+    assert_eq!(
+      -184813,
+      date_index(&Date::new(-506, 1, 1).expect("error creating instance in test"))
+    );
+    assert_eq!(
+      0,
+      date_index(&Date::new(1, 1, 1).expect("error creating instance in test"))
+    );
+    assert_eq!(
+      365026,
+      date_index(&Date::new(1000, 5, 30).expect("error creating instance in test"))
+    );
+    assert_eq!(
+      1310776,
+      date_index(&Date::new(3589, 10, 14).expect("error creating instance in test"))
+    );
+  }
+
+  #[test]
+  fn gauss_algorithm_test() {
+    let w = Date::new(2000, 1, 1).expect("error creating instance in test");
+    let x = Date::new(1856, 1, 31).expect("error creating instance in test");
+    let y = Date::new(1000, 7, 26).expect("error creating instance in test");
+    let z = Date::new(1, 5, 15).expect("error creating instance in test");
+    assert_eq!(gauss_algorithm(&w), 5);
+    assert_eq!(gauss_algorithm(&x), 3);
+    assert_eq!(gauss_algorithm(&y), 5);
+    assert_eq!(gauss_algorithm(&z), 1);
+
   }
 } // mod implementation_test
