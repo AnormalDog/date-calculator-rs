@@ -223,14 +223,12 @@ pub fn gauss_algorithm(date: &Date) -> u8 {
       MONTH_OFFSET[index]
     }
   };
-  //println!("day: {}", month_day.1);
   let d: i32 = (month_day.1 as i32
     + offset
     + 5 * ((date.year - 1) % 4)
     + 4 * ((date.year - 1) % 100)
     + 6 * ((date.year - 1) % 400))
     % 7;
-  //println!("d: {d}");
   gauss_algorithm_weekday_normalizer(d as u8)
 }
 
