@@ -75,13 +75,9 @@ pub fn normalize_year(year: i32) -> i32 {
 }
 
 /// Reverse operation to normalize_year
+#[allow(dead_code)]
 pub fn standarize_year(year: i32) -> i32 {
-  if year <= 0 {
-    year -1
-  }
-  else {
-    year
-  }
+  if year <= 0 { year - 1 } else { year }
 }
 
 /// Add n days
@@ -212,7 +208,7 @@ fn gauss_algorithm_weekday_normalizer(weekday: u8) -> u8 {
   }
 }
 
-fn gauss_algorithm(date: &Date) -> u8 {
+pub fn gauss_algorithm(date: &Date) -> u8 {
   let month_day = standarized_months_day(date);
   let index = (month_day.0 - 1) as usize;
   let offset = {
@@ -331,6 +327,5 @@ mod implementation_test {
     assert_eq!(gauss_algorithm(&x), 3);
     assert_eq!(gauss_algorithm(&y), 5);
     assert_eq!(gauss_algorithm(&z), 1);
-
   }
 } // mod implementation_test

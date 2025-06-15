@@ -7,8 +7,8 @@
 mod implementation;
 
 use crate::implementation::{
-  add_n_days, add_n_months, add_n_years, date_index, normalize_year, remove_n_days,
-  remove_n_months, remove_n_years, validate, validate_raw, year_index,
+  add_n_days, add_n_months, add_n_years, date_index, gauss_algorithm, normalize_year,
+  remove_n_days, remove_n_months, remove_n_years, validate, validate_raw, year_index,
 };
 use std::fmt;
 
@@ -17,6 +17,7 @@ pub enum DateError {
   InvalidNewInput,
   OutOfLimits,
   InternalError,
+  GregorianLimits,
 }
 
 impl fmt::Display for DateError {
@@ -27,6 +28,9 @@ impl fmt::Display for DateError {
         f.write_str("the date is outside of the limits (-9999 - 9999) years")
       }
       DateError::InternalError => f.write_str("internal error, found a weird number in index"),
+      DateError::GregorianLimits => {
+        f.write_str("Dude to gregorian limitations, this operation is not possible")
+      }
     }
   }
 }
@@ -130,6 +134,15 @@ impl Date {
   /// Returns the number of days between two Dates. If date1 is after date2, the result will be negative
   pub fn days_between(date1: &Date, date2: &Date) -> i64 {
     date_index(date2) - date_index(date1)
+  }
+
+  /// Returns the weekday, being 0 Monday and 6 Sunday. If the year is BC, returns Err
+  pub fn weekday(&self) -> Result<u8, DateError> {
+    if self.year <= 0 {
+      Err(DateError::GregorianLimits)
+    } else {
+      Ok(gauss_algorithm(self))
+    }
   }
 } // impl Date
 

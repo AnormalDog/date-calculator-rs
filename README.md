@@ -16,6 +16,6 @@ All is around the struct Date, with a range of 9999BC to 9999AC.
 - [x]  Add days/weeks/months/years.
 - [x]  Delete days/weeks/months/years.
 - [x]  Count days between two dates.
-- [ ]  What day of the week is.
+- [x]  What day of the week is.
 ## LICENSE
 [MIT](https://choosealicense.com/licenses/mit/)
