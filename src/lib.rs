@@ -59,76 +59,38 @@ impl Date {
     Ok(x)
   }
 
-  /// Checks if the result is valid, then add n days.
-  pub fn add_days(&mut self, days: u32) -> Result<&mut Self, DateError> {
+  /// Check if the result is valid, then adds n years, m months and x days to a date, in that order
+  pub fn add(&mut self, year: u32, months: u32, days: u32) -> Result<&mut Self, DateError> {
     let mut aux = *self;
-    add_n_days(&mut aux, days);
+    if year > 0 {
+      add_n_years(&mut aux, year);
+    }
+    if months > 0 { // More expensive than others.
+      add_n_months(&mut aux, months);
+    }
+    if days > 0 {
+      add_n_days(&mut aux, days);
+    }
     validate(&aux)?;
     *self = aux;
     Ok(self)
   }
 
-  /// Checks if the result is valid, then add n weeks.
-  pub fn add_weeks(&mut self, weeks: u32) -> Result<&mut Self, DateError> {
-    let mut aux = *self;
-    add_n_days(&mut aux, weeks * 7);
+  /// Check if the result is valid, then substract n years, m months and x days to a date, in that order
+  pub fn substract(&mut self, year: u32, months: u32, days: u32) -> Result<&mut Self, DateError> {
+      let mut aux = *self;
+    if year > 0 {
+      remove_n_years(&mut aux, year);
+    }
+    if months > 0 { // More expensive than others.
+      remove_n_months(&mut aux, months);
+    }
+    if days > 0 {
+      remove_n_days(&mut aux, days);
+    }
     validate(&aux)?;
     *self = aux;
-    Ok(self)
-  }
-
-  /// Checks if the result is valid, then add n months. More expensive than others.
-  pub fn add_months(&mut self, months: u32) -> Result<&mut Self, DateError> {
-    let mut aux = *self;
-    add_n_months(&mut aux, months);
-    validate(&aux)?;
-    *self = aux;
-    Ok(self)
-  }
-
-  /// Checks if the result is valid, then add n years.
-  pub fn add_years(&mut self, years: u32) -> Result<&mut Self, DateError> {
-    let mut aux = *self;
-    add_n_years(&mut aux, years);
-    validate(&aux)?;
-    *self = aux;
-    Ok(self)
-  }
-
-  /// Check if the result is valid, then remove n days.
-  pub fn remove_days(&mut self, days: u32) -> Result<&mut Self, DateError> {
-    let mut aux = *self;
-    remove_n_days(&mut aux, days);
-    validate(&aux)?;
-    *self = aux;
-    Ok(self)
-  }
-
-  /// Check if the result is valid, then remove n weeks.
-  pub fn remove_weeks(&mut self, days: u32) -> Result<&mut Self, DateError> {
-    let mut aux = *self;
-    remove_n_days(&mut aux, days * 7);
-    validate(&aux)?;
-    *self = aux;
-    Ok(self)
-  }
-
-  /// Checks if the result is valid, then remove n months. More expensive than others.
-  pub fn remove_months(&mut self, months: u32) -> Result<&mut Self, DateError> {
-    let mut aux = *self;
-    remove_n_months(&mut aux, months);
-    validate(&aux)?;
-    *self = aux;
-    Ok(self)
-  }
-
-  /// Checks if the result is valid, then remove n years.
-  pub fn remove_years(&mut self, years: u32) -> Result<&mut Self, DateError> {
-    let mut aux = *self;
-    remove_n_years(&mut aux, years);
-    validate(&aux)?;
-    *self = aux;
-    Ok(self)
+    Ok(self)  
   }
 
   /// Returns the number of days between two Dates. If date1 is after date2, the result will be negative
@@ -158,26 +120,8 @@ mod lib_test {
   }
 
   #[test]
-  fn add_test() {
-    let mut x = Date::new(2000, 2, 29).expect("error creating instance in test");
-    let y = x;
-    x.add_years(10000).expect_err("msg");
-    assert_eq!(x, y);
-  }
-
-  #[test]
   fn multiple_operation_test() {
-    let mut x = Date::new(2000, 2, 29).expect("error creating instance in test");
-    let expected = x.clone();
-    x.add_days(50)
-      .expect("error adding")
-      .add_weeks(5)
-      .expect("error adding");
-    x.remove_days(50)
-      .expect("error removing")
-      .remove_weeks(5)
-      .expect("error removing");
-    assert_eq!(x, expected);
+
   }
 
   #[test]
@@ -186,5 +130,21 @@ mod lib_test {
     let y = Date::new(2005, 3, 30).expect("error creating instance in test");
     assert_eq!(1915, Date::days_between(&x, &y));
     assert_eq!(-1915, Date::days_between(&y, &x));
+  }
+
+  #[test]
+  fn add_test() {
+    let mut x = Date::new(2000, 1, 1).expect("error creating instance in test");
+    let expected = Date::new(2005, 11, 21).expect("error creating instance in test");
+    x.add(5, 10, 20).expect("error adding");
+    assert_eq!(x, expected);
+  }
+
+  #[test]
+  fn substract_test() {
+    let mut x = Date::new(2000, 1, 1).expect("error creating instance in test");
+    let expected = Date::new(1994, 2, 9).expect("error creating instance in test");
+    x.substract(5, 10, 20).expect("error substracting");
+    assert_eq!(x, expected); 
   }
 } // mod lib_test

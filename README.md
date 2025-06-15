@@ -13,8 +13,8 @@ All is around the struct Date, with a range of 9999BC to 9999AC.
 - [x]  Is date's year leap.
 - [x]  New.
 - [x]  Validate. 
-- [x]  Add days/weeks/months/years.
-- [x]  Delete days/weeks/months/years.
+- [x]  Add years/months/days.
+- [x]  Substract years/months/days.
 - [x]  Count days between two dates.
 - [x]  What day of the week is.
 ## LICENSE
