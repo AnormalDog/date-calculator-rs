@@ -192,9 +192,11 @@ fn is_date_before(date1: &Date, date2: &Date) -> bool {
   }
 }
 
+/// Month offset required in gauss_algorithm
 const MONTH_OFFSET: [i32; 12] = [0, 3, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5];
 const MONTH_OFFSET_LEAP: [i32; 12] = [0, 3, 4, 0, 2, 5, 0, 3, 6, 1, 4, 6];
 
+/// Due in gauss algorithm weekday starts with 0 == sunday, this fn normalize that.
 fn gauss_algorithm_weekday_normalizer(weekday: u8) -> u8 {
   assert!(weekday < 7);
   match weekday {
@@ -208,7 +210,10 @@ fn gauss_algorithm_weekday_normalizer(weekday: u8) -> u8 {
   }
 }
 
+/// Does the gauss algorithm to find the weekday. Can operate with BC years. 
+/// See: https://en.wikipedia.org/wiki/Determination_of_the_day_of_the_week
 pub fn gauss_algorithm(date: &Date) -> u8 {
+  assert!(date.year > 0);
   let month_day = standarized_months_day(date);
   let index = (month_day.0 - 1) as usize;
   let offset = {
